@@ -50,7 +50,7 @@ Sub MAJ_BDD_IM()
             Dim i As Long
             
             Set colRange = tbl.ListColumns(colonneDateDebutIndex).DataBodyRange
-            For i = colRange.Rows.Count To 1 Step -1
+            For i = colRange.Rows.count To 1 Step -1
                 If Not IsEmpty(colRange.Cells(i, 1).Value) Then
                     derniereValeurDateDebut = colRange.Cells(i, 1).Value
                     Exit For
@@ -131,91 +131,3 @@ Sub MAJ_BDD_IM()
                 MsgBox "PI DataLink add-in non trouvé"
                 Exit Sub
             End If
-            
-            ' Effectuer les calculs pour chaque cellule vide dans tout le tableau
-            Dim j As Long
-            Dim calcCell As Range
-            Dim count As Integer
-            count = 0 ' Compteur pour limiter les affichages
-            For i = celluleDateDebut.Row + 1 To derniereLigne
-                For j = 1 To tbl.ListColumns.Count
-                    Set calcCell = tbl.DataBodyRange.Cells(i, j)
-                    If IsEmpty(calcCell.Value) Then
-                        ' Récupérer les valeurs des arguments
-                        Dim arg1 As Variant, arg2 As Variant, arg3 As Variant
-                        Dim arg4 As Variant, arg5 As Variant, arg6 As Variant
-                        Dim arg7 As Variant, arg8 As Variant, arg9 As Variant
-                        
-                        ' Récupérer les valeurs des arguments selon vos instructions
-                        arg1 = tbl.DataBodyRange.Cells(3, j).Value ' Troisième ligne du tableau, colonne actuelle
-                        arg2 = tbl.DataBodyRange.Cells(i, 1).Value ' Colonne 1, ligne actuelle
-                        arg3 = tbl.DataBodyRange.Cells(i, 2).Value ' Colonne 2, ligne actuelle
-                        
-                        ' Récupérer la valeur de la cellule "Type de calcul"
-                        Dim typeCalcul As String
-                        typeCalcul = tbl.DataBodyRange.Cells(ligneTypeCalcul, j).Value
-                        
-                        ' Déterminer la valeur de l'argument 4
-                        If typeCalcul = "total" Then
-                            arg4 = "total"
-                        ElseIf typeCalcul = "moyenne" Then
-                            arg4 = "average (time-weighted)"
-                        Else
-                            arg4 = "" ' Mettre une valeur par défaut ou ignorer cette cellule
-                        End If
-                        
-                        ' Définir les autres arguments
-                        arg5 = "time-weighted"
-                        arg6 = 0
-                        arg7 = 1
-                        arg8 = 0
-                        arg9 = "" ' Argument vide
-
-                        ' Vérifier que tous les arguments sont présents
-                        If arg1 <> "" And arg2 <> "" And arg3 <> "" _
-                            And arg4 <> "" And arg5 <> "" Then
-                            ' Construire la formule
-                            Dim formule As String
-                            formule = "=PIAdvCalcVal(" & _
-                                """" & arg1 & """; " & _
-                                """" & arg2 & """; " & _
-                                """" & arg3 & """; " & _
-                                """" & arg4 & """; " & _
-                                """" & arg5 & """; " & _
-                                arg6 & "; " & _
-                                arg7 & "; " & _
-                                arg8 & "; " & _
-                                """" & arg9 & """)"
-                            
-                            ' Afficher les arguments et la formule pour les deux premières cellules vides
-                            If count < 2 Then
-                                MsgBox "Arguments pour la cellule (" & i & ", " & j & "):" & vbCrLf & _
-                                       "arg1: " & arg1 & vbCrLf & _
-                                       "arg2: " & arg2 & vbCrLf & _
-                                       "arg3: " & arg3 & vbCrLf & _
-                                       "arg4: " & arg4 & vbCrLf & _
-                                       "arg5: " & arg5 & vbCrLf & _
-                                       "arg6: " & arg6 & vbCrLf & _
-                                       "arg7: " & arg7 & vbCrLf & _
-                                       "arg8: " & arg8 & vbCrLf & _
-                                       "arg9: " & arg9
-                                
-                                MsgBox "Formule pour la cellule (" & i & ", " & j & "): " & formule
-                                count = count + 1
-                            End If
-                            
-                            ' Écrire la formule dans la cellule
-                            calcCell.Formula = formule
-                        End If
-                    End If
-                Next j
-            Next i
-        Else
-            MsgBox "Cellule 'Date de début' non trouvée"
-        End If
-    Else
-        MsgBox "Pas de tableau"
-    End If
-End Sub
-
-
