@@ -50,7 +50,7 @@ Sub MAJ_BDD_IM()
             Dim i As Long
             
             Set colRange = tbl.ListColumns(colonneDateDebutIndex).DataBodyRange
-            For i = colRange.Rows.count To 1 Step -1
+            For i = colRange.Rows.Count To 1 Step -1
                 If Not IsEmpty(colRange.Cells(i, 1).Value) Then
                     derniereValeurDateDebut = colRange.Cells(i, 1).Value
                     Exit For
@@ -136,32 +136,54 @@ Sub MAJ_BDD_IM()
             Dim r As Range
             For Each r In tbl.DataBodyRange
                 If IsEmpty(r.Value) Then
-                ' Récupérer les valeurs des arguments
-                        Dim arg1 As Variant, arg2 As Variant, arg3 As Variant
-                        Dim arg4 As Variant, arg5 As Variant, arg6 As Variant
-                        Dim arg7 As Variant, arg8 As Variant, arg9 As Variant
+                    ' Récupérer les valeurs des arguments
+                    Dim arg1 As Variant, arg2 As Variant, arg3 As Variant
+                    Dim arg4 As Variant, arg5 As Variant, arg6 As Variant
+                    Dim arg7 As Variant, arg8 As Variant, arg9 As Variant
+                    
+                    ' Récupérer les valeurs des arguments selon vos instructions
+                    arg1 = tbl.DataBodyRange.Cells(ligneTagPI, r.Column).Value ' Ligne "Tag PI", colonne actuelle
+                    arg2 = tbl.DataBodyRange.Cells(r.Row, 1).Value ' Colonne 1, ligne actuelle
+                    arg3 = tbl.DataBodyRange.Cells(r.Row, 2).Value ' Colonne 2, ligne actuelle
+                    
+                    ' Déterminer la valeur de l'argument 4
+                    Dim typeCalcul As String
+                    typeCalcul = tbl.DataBodyRange.Cells(ligneTypeCalcul, r.Column).Value
+                    
+                    If typeCalcul = "total" Then
+                        arg4 = "total"
+                    ElseIf typeCalcul = "moyenne" Then
+                        arg4 = "average (time-weighted)"
+                    Else
+                        arg4 = "" ' Mettre une valeur par défaut ou ignorer cette cellule
+                    End If
+                    
+                    ' Définir les autres arguments
+                    arg5 = "time-weighted"
+                    arg6 = 0
+                    arg7 = 1
+                    arg8 = 0
+                    arg9 = "" ' Argument vide
+                    
+                    If arg1 <> "" And arg2 <> "" And arg3 <> "" And arg4 <> "" Then
+                        ' Construire la formule
+                        Dim formule As String
+                        formule = "=PIAdvCalcVal(" & _
+                            """" & arg1 & """; " & _
+                            """" & arg2 & """; " & _
+                            """" & arg3 & """; " & _
+                            """" & arg4 & """; " & _
+                            """" & arg5 & """; " & _
+                            arg6 & "; " & _
+                            arg7 & "; " & _
+                            arg8 & "; " & _
+                            """" & arg9 & """)"
                         
-                        ' Récupérer les valeurs des arguments selon vos instructions
-                        arg1 = tbl.DataBodyRange.Cells(ligneTagPI, r).Value ' Ligne "Tag PI", colonne actuelle
-                        arg2 = tbl.DataBodyRange.Cells(r, 1).Value ' Colonne 1, ligne actuelle
-                        arg3 = tbl.DataBodyRange.Cells(r, 2).Value ' Colonne 2, ligne actuelle
-                        ' Déterminer la valeur de l'argument 4
-                        If typeCalcul = "total" Then
-                            arg4 = "total"
-                        ElseIf typeCalcul = "moyenne" Then
-                            arg4 = "average (time-weighted)"
-                        Else
-                            arg4 = "" ' Mettre une valeur par défaut ou ignorer cette cellule
-                        End If
-                        
-                        ' Définir les autres arguments
-                        arg5 = "time-weighted"
-                        arg6 = 0
-                        arg7 = 1
-                        arg8 = 0
-                        arg9 = "" ' Argument vide
-                        
-                    r.Value = "=PIAdvCalcval(arg1;arg2;arg3;arg4;arg5;arg6;arg7;arg8;arg9)"
+                        ' Écrire la formule dans la cellule
+                        r.Formula = formule
+                    Else
+                        r.Value = "Vide"
+                    End If
                 End If
             Next r
             
