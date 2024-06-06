@@ -131,3 +131,19 @@ Sub MAJ_BDD_IM()
                 MsgBox "PI DataLink add-in non trouvé"
                 Exit Sub
             End If
+            
+            ' Étape 4 : Parcourir chaque cellule vide du tableau et la remplacer par "Vide"
+            Dim r As Range
+            For Each r In tbl.DataBodyRange
+                If IsEmpty(r.Value) Then
+                    r.Value = "Vide"
+                End If
+            Next r
+            
+        Else
+            MsgBox "Cellule 'Date de début' non trouvée"
+        End If
+    Else
+        MsgBox "Pas de tableau"
+    End If
+End Sub
