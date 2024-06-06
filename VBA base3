@@ -92,6 +92,7 @@ Sub MAJ_BDD_IM()
            
             If Not celluleTagPI Is Nothing Then
                 ligneTagPI = celluleTagPI.Row - tbl.DataBodyRange.Rows(1).Row + 1
+                MsgBox "Cellule 'Tag PI' trouvée dans la ligne " & ligneTagPI
             Else
                 MsgBox "Cellule 'Tag PI' non trouvée"
                 Exit Sub
@@ -107,16 +108,17 @@ Sub MAJ_BDD_IM()
            
             If Not celluleTypeCalcul Is Nothing Then
                 ligneTypeCalcul = celluleTypeCalcul.Row - tbl.DataBodyRange.Rows(1).Row + 1
+                MsgBox "Cellule 'Type de calcul' trouvée dans la ligne " & ligneTypeCalcul
             Else
                 MsgBox "Cellule 'Type de calcul' non trouvée"
                 Exit Sub
             End If
            
-            ' Effectuer les calculs pour chaque cellule vide à partir de la colonne 3
+            ' Effectuer les calculs pour chaque cellule vide du tableau
             Dim j As Long
             Dim calcCell As Range
             For i = celluleDateDebut.Row + 1 To derniereLigne
-                For j = 3 To tbl.ListColumns.Count
+                For j = 1 To tbl.ListColumns.Count
                     Set calcCell = tbl.DataBodyRange.Cells(i, j)
                     If IsEmpty(calcCell.Value) Then
                         ' Récupérer les valeurs des arguments
@@ -125,7 +127,7 @@ Sub MAJ_BDD_IM()
                         Dim arg7 As Variant, arg8 As Variant, arg9 As Variant
                        
                         ' Récupérer la valeur de l'argument 1
-                        valeurArg1 = tbl.DataBodyRange.Cells(ligneTagPI, j).Value ' Troisième ligne du tableau, colonne actuelle
+                        valeurArg1 = tbl.DataBodyRange.Cells(3, j).Value ' Troisième ligne du tableau, colonne actuelle
                         arg2 = tbl.DataBodyRange.Cells(i, 1).Value ' Colonne 1, ligne actuelle
                         arg3 = tbl.DataBodyRange.Cells(i, 2).Value ' Colonne 2, ligne actuelle
                        
@@ -158,6 +160,8 @@ Sub MAJ_BDD_IM()
                             formule = "=PIAdvCalcVal(" & valeurArg1 & "," & arg2 & "," & arg3 & "," & arg4 & "," & arg5 & "," & arg6 & "," & arg7 & "," & arg8 & "," & arg9 & ")"
                             ' Vérifier la valeur de l'argument 1
                             MsgBox "Valeur de l'argument 1 : " & valeurArg1
+                            ' Vérifier la formule générée
+                            MsgBox "Formule générée : " & formule
                             ' Écrire la formule dans la cellule
                             calcCell.Formula = formule
                         End If
@@ -172,4 +176,5 @@ Sub MAJ_BDD_IM()
         MsgBox "Pas de tableau"
     End If
 End Sub
+
 
