@@ -140,14 +140,14 @@ Sub MAJ_BDD_IM()
             For Each r In tbl.DataBodyRange
                 If IsEmpty(r.Value) Then
                     ' Récupérer les valeurs des arguments
-                    Dim arg1 As Variant, arg2 As Variant, arg3 As Variant
-                    Dim arg4 As Variant, arg5 As Variant, arg6 As Variant
-                    Dim arg7 As Variant, arg8 As Variant, arg9 As Variant
+                    Dim arg1 As String, arg2 As String, arg3 As String
+                    Dim arg4 As String, arg5 As String, arg6 As Variant
+                    Dim arg7 As Variant, arg8 As Variant, arg9 As String
                     
-                    ' Récupérer les valeurs des arguments selon vos instructions
-                    arg1 = tbl.DataBodyRange.Cells(ligneTagPI, r.Column).Value ' Ligne "Tag PI", colonne actuelle
-                    arg2 = tbl.DataBodyRange.Cells(r.Row, 1).Value ' Colonne 1, ligne actuelle
-                    arg3 = tbl.DataBodyRange.Cells(r.Row, 2).Value ' Colonne 2, ligne actuelle
+                    ' Construire les références des arguments
+                    arg1 = tbl.DataBodyRange.Cells(ligneTagPI, r.Column).Address(RowAbsolute:=True, ColumnAbsolute:=True)
+                    arg2 = tbl.DataBodyRange.Cells(r.Row, 1).Address(RowAbsolute:=True, ColumnAbsolute:=True)
+                    arg3 = tbl.DataBodyRange.Cells(r.Row, 2).Address(RowAbsolute:=True, ColumnAbsolute:=True)
                     
                     ' Déterminer la valeur de l'argument 4
                     Dim typeCalcul As String
@@ -187,9 +187,9 @@ Sub MAJ_BDD_IM()
                         ' Construire la formule
                         Dim formule As String
                         formule = "=PIAdvCalcVal(" & _
-                            """" & arg1 & """; " & _
-                            """" & arg2 & """; " & _
-                            """" & arg3 & """; " & _
+                            arg1 & "; " & _
+                            arg2 & "; " & _
+                            arg3 & "; " & _
                             """" & arg4 & """; " & _
                             """" & arg5 & """; " & _
                             arg6 & "; " & _
