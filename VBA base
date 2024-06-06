@@ -126,6 +126,7 @@ Sub MAJ_BDD_IM()
             
             If Not addIn Is Nothing Then
                 Set automationObject = addIn.Object
+                MsgBox "PI DataLink add-in trouvé"
             Else
                 MsgBox "PI DataLink add-in non trouvé"
                 Exit Sub
