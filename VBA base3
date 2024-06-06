@@ -134,6 +134,9 @@ Sub MAJ_BDD_IM()
             
             ' Étape 4 : Parcourir chaque cellule vide du tableau et la remplacer par "Vide"
             Dim r As Range
+            Dim premiereCelluleVideTrouvee As Boolean
+            premiereCelluleVideTrouvee = False
+            
             For Each r In tbl.DataBodyRange
                 If IsEmpty(r.Value) Then
                     ' Récupérer les valeurs des arguments
@@ -166,6 +169,21 @@ Sub MAJ_BDD_IM()
                     arg9 = "" ' Argument vide
                     
                     If arg1 <> "" And arg2 <> "" And arg3 <> "" And arg4 <> "" Then
+                        ' Afficher les arguments pour la première cellule vide trouvée
+                        If Not premiereCelluleVideTrouvee Then
+                            MsgBox "Arguments pour la première cellule vide trouvée:" & vbCrLf & _
+                                   "arg1: " & arg1 & vbCrLf & _
+                                   "arg2: " & arg2 & vbCrLf & _
+                                   "arg3: " & arg3 & vbCrLf & _
+                                   "arg4: " & arg4 & vbCrLf & _
+                                   "arg5: " & arg5 & vbCrLf & _
+                                   "arg6: " & arg6 & vbCrLf & _
+                                   "arg7: " & arg7 & vbCrLf & _
+                                   "arg8: " & arg8 & vbCrLf & _
+                                   "arg9: " & arg9
+                            premiereCelluleVideTrouvee = True
+                        End If
+                        
                         ' Construire la formule
                         Dim formule As String
                         formule = "=PIAdvCalcVal(" & _
