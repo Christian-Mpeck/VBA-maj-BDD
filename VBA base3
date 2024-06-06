@@ -1,14 +1,19 @@
 Sub MAJ_BDD_IM()
+
     ' Étape 1 : Retrouver le Tableau "BDD_IM"
+   
     Dim ws As Worksheet
     Dim tbl As ListObject
     Dim tableauTrouve As Boolean
-    
+   
     tableauTrouve = False
-    
+   
     ' Parcourir toutes les feuilles du classeur
+   
     For Each ws In ThisWorkbook.Worksheets
+   
         ' Parcourir tous les objets de liste (tables) dans chaque feuille
+       
         For Each tbl In ws.ListObjects
             If tbl.Name = "BDD_IM" Then
                 tableauTrouve = True
@@ -17,20 +22,23 @@ Sub MAJ_BDD_IM()
         Next tbl
         If tableauTrouve Then Exit For
     Next ws
-    
+   
     ' Vérifier si le tableau a été trouvé
+   
     If tableauTrouve Then
         MsgBox "Tableau trouvé"
-        
+       
         ' Étape 2 : Chercher la cellule "Date de début" dans tout le tableau
+       
         Dim celluleDateDebut As Range
         Dim colonneDateDebutIndex As Integer
         Dim derniereValeurDateDebut As Variant
         Dim cell As Range
-        
+       
         Set celluleDateDebut = Nothing
-        
+       
         ' Rechercher la cellule "Date de début" dans tout le tableau
+       
         On Error Resume Next
         For Each cell In tbl.Range
             If cell.Value = "Date de début" Then
@@ -39,16 +47,16 @@ Sub MAJ_BDD_IM()
             End If
         Next cell
         On Error GoTo 0
-        
+       
         ' Vérifier si la cellule a été trouvée
         If Not celluleDateDebut Is Nothing Then
             colonneDateDebutIndex = celluleDateDebut.Column - tbl.Range.Cells(1, 1).Column + 1
             MsgBox "Cellule 'Date de début' trouvée dans la colonne " & colonneDateDebutIndex
-            
+           
             ' Trouver la dernière valeur non vide de cette colonne
             Dim colRange As Range
             Dim i As Long
-            
+           
             Set colRange = tbl.ListColumns(colonneDateDebutIndex).DataBodyRange
             For i = colRange.Rows.Count To 1 Step -1
                 If Not IsEmpty(colRange.Cells(i, 1).Value) Then
@@ -56,154 +64,100 @@ Sub MAJ_BDD_IM()
                     Exit For
                 End If
             Next i
-            
+           
             ' Vérifier si la dernière valeur correspond à la date d'hier
             Dim dateHier As Date
             dateHier = Date - 1
-            
+           
             ' Remplir les dates manquantes jusqu'à la date d'hier
             Do While derniereValeurDateDebut < dateHier
                 i = i + 1
                 colRange.Cells(i, 1).Value = DateAdd("d", 1, derniereValeurDateDebut)
                 derniereValeurDateDebut = colRange.Cells(i, 1).Value
             Loop
-            
+           
             MsgBox "La dernière valeur ajustée à la date d'hier est : " & derniereValeurDateDebut
-            
+           
             ' Déterminer la dernière ligne non vide dans la colonne "Date de début"
             Dim derniereLigne As Long
             derniereLigne = colRange.Cells(i, 1).Row
-            
+           
             ' Récupérer la ligne de la cellule "Tag PI"
             Dim ligneTagPI As Long
             Dim celluleTagPI As Range
             Set celluleTagPI = Nothing
             On Error Resume Next
-            For Each cell In tbl.Range
-                If cell.Value = "Tag PI" Then
-                    Set celluleTagPI = cell
-                    Exit For
-                End If
-            Next cell
+            Set celluleTagPI = tbl.DataBodyRange.Rows(3).Find("Tag PI", LookIn:=xlValues, LookAt:=xlWhole)
             On Error GoTo 0
-            
+           
             If Not celluleTagPI Is Nothing Then
-                ligneTagPI = celluleTagPI.Row - tbl.Range.Cells(1, 1).Row + 1
-                MsgBox "Cellule 'Tag PI' trouvée à la ligne " & ligneTagPI
+                ligneTagPI = celluleTagPI.Row - tbl.DataBodyRange.Rows(1).Row + 1
             Else
                 MsgBox "Cellule 'Tag PI' non trouvée"
                 Exit Sub
             End If
-            
-            ' Étape 3 : Récupérer la ligne de la cellule "Type de calcul"
+           
+            ' Récupérer la ligne de la cellule "Type de calcul"
             Dim ligneTypeCalcul As Long
             Dim celluleTypeCalcul As Range
             Set celluleTypeCalcul = Nothing
             On Error Resume Next
-            For Each cell In tbl.Range
-                If cell.Value = "Type de calcul" Then
-                    Set celluleTypeCalcul = cell
-                    Exit For
-                End If
-            Next cell
+            Set celluleTypeCalcul = tbl.DataBodyRange.Rows(3).Find("Type de calcul", LookIn:=xlValues, LookAt:=xlWhole)
             On Error GoTo 0
-            
+           
             If Not celluleTypeCalcul Is Nothing Then
-                ligneTypeCalcul = celluleTypeCalcul.Row - tbl.Range.Cells(1, 1).Row + 1
-                MsgBox "Cellule 'Type de calcul' trouvée à la ligne " & ligneTypeCalcul
+                ligneTypeCalcul = celluleTypeCalcul.Row - tbl.DataBodyRange.Rows(1).Row + 1
             Else
                 MsgBox "Cellule 'Type de calcul' non trouvée"
                 Exit Sub
             End If
-            
-            ' Configuration de l'add-in PI DataLink
-            Dim addIn As COMAddIn
-            Dim automationObject As Object
-            
-            On Error Resume Next
-            Set addIn = Application.COMAddIns("PI DataLink")
-            On Error GoTo 0
-            
-            If Not addIn Is Nothing Then
-                Set automationObject = addIn.Object
-                MsgBox "PI DataLink add-in trouvé"
-            Else
-                MsgBox "PI DataLink add-in non trouvé"
-                Exit Sub
-            End If
-            
+           
             ' Effectuer les calculs pour chaque cellule vide à partir de la colonne 3
             Dim j As Long
             Dim calcCell As Range
-            Dim count As Integer
-            count = 0 ' Compteur pour limiter les affichages
             For i = celluleDateDebut.Row + 1 To derniereLigne
                 For j = 3 To tbl.ListColumns.Count
                     Set calcCell = tbl.DataBodyRange.Cells(i, j)
                     If IsEmpty(calcCell.Value) Then
                         ' Récupérer les valeurs des arguments
-                        Dim arg1 As Variant, arg2 As Variant, arg3 As Variant
+                        Dim valeurArg1 As Variant, arg2 As Variant, arg3 As Variant
                         Dim arg4 As Variant, arg5 As Variant, arg6 As Variant
                         Dim arg7 As Variant, arg8 As Variant, arg9 As Variant
-                        
-                        ' Récupérer les valeurs des arguments selon vos instructions
-                        arg1 = tbl.DataBodyRange.Cells(ligneTagPI, j).Value ' Ligne "Tag PI", colonne actuelle
+                       
+                        ' Récupérer la valeur de l'argument 1
+                        valeurArg1 = tbl.DataBodyRange.Cells(ligneTagPI, j).Value ' Troisième ligne du tableau, colonne actuelle
                         arg2 = tbl.DataBodyRange.Cells(i, 1).Value ' Colonne 1, ligne actuelle
                         arg3 = tbl.DataBodyRange.Cells(i, 2).Value ' Colonne 2, ligne actuelle
-                        
+                       
                         ' Récupérer la valeur de la cellule "Type de calcul"
                         Dim typeCalcul As String
                         typeCalcul = tbl.DataBodyRange.Cells(ligneTypeCalcul, j).Value
-                        
+                       
                         ' Déterminer la valeur de l'argument 4
                         If typeCalcul = "total" Then
-                            arg4 = "total"
+                            arg4 = """total"""
                         ElseIf typeCalcul = "moyenne" Then
-                            arg4 = "average (time-weighted)"
+                            arg4 = """average (time-weighted)"""
                         Else
                             arg4 = "" ' Mettre une valeur par défaut ou ignorer cette cellule
                         End If
-                        
+                       
                         ' Définir les autres arguments
-                        arg5 = "time-weighted"
+                        arg5 = """time-weighted"""
                         arg6 = 0
                         arg7 = 1
                         arg8 = 0
-                        arg9 = "" ' Argument vide
+                        arg9 = """ """ ' Argument vide avec guillemets
 
                         ' Vérifier que tous les arguments sont présents
-                        If arg1 <> "" And arg2 <> "" And arg3 <> "" _
-                            And arg4 <> "" And arg5 <> "" Then
-                            ' Construire la formule
+                        If Not IsMissing(valeurArg1) And Not IsMissing(arg2) And Not IsMissing(arg3) _
+                            And Not IsMissing(arg4) And Not IsMissing(arg5) And Not IsMissing(arg6) _
+                            And Not IsMissing(arg7) And Not IsMissing(arg8) And Not IsMissing(arg9) Then
+                            ' Construire la formule PIAdvCalcVal
                             Dim formule As String
-                            formule = "=PIAdvCalcVal(" & _
-                                """" & arg1 & """; " & _
-                                """" & arg2 & """; " & _
-                                """" & arg3 & """; " & _
-                                """" & arg4 & """; " & _
-                                """" & arg5 & """; " & _
-                                arg6 & "; " & _
-                                arg7 & "; " & _
-                                arg8 & "; " & _
-                                """" & arg9 & """)"
-                            
-                            ' Afficher les arguments et la formule pour les deux premières cellules vides
-                            If count < 2 Then
-                                MsgBox "Arguments pour la cellule (" & i & ", " & j & "):" & vbCrLf & _
-                                       "arg1: " & arg1 & vbCrLf & _
-                                       "arg2: " & arg2 & vbCrLf & _
-                                       "arg3: " & arg3 & vbCrLf & _
-                                       "arg4: " & arg4 & vbCrLf & _
-                                       "arg5: " & arg5 & vbCrLf & _
-                                       "arg6: " & arg6 & vbCrLf & _
-                                       "arg7: " & arg7 & vbCrLf & _
-                                       "arg8: " & arg8 & vbCrLf & _
-                                       "arg9: " & arg9
-                                
-                                MsgBox "Formule pour la cellule (" & i & ", " & j & "): " & formule
-                                count = count + 1
-                            End If
-                            
+                            formule = "=PIAdvCalcVal(" & valeurArg1 & "," & arg2 & "," & arg3 & "," & arg4 & "," & arg5 & "," & arg6 & "," & arg7 & "," & arg8 & "," & arg9 & ")"
+                            ' Vérifier la valeur de l'argument 1
+                            MsgBox "Valeur de l'argument 1 : " & valeurArg1
                             ' Écrire la formule dans la cellule
                             calcCell.Formula = formule
                         End If
@@ -213,7 +167,9 @@ Sub MAJ_BDD_IM()
         Else
             MsgBox "Cellule 'Date de début' non trouvée"
         End If
+       
     Else
         MsgBox "Pas de tableau"
     End If
 End Sub
+
